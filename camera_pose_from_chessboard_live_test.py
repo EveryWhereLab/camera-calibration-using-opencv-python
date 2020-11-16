@@ -36,6 +36,7 @@ with open(CAMERA_PARAMETERS_INPUT_FILE) as f:
     mtx = loadeddict.get('camera_matrix')
     dist = loadeddict.get('dist_coeff')
     mtx = np.array(mtx)
+    mtx_inv = np.linalg.inv(mtx)
     dist = np.array(dist)
 
 while True:
@@ -57,7 +58,7 @@ while True:
         corners3 = cv2.undistortPoints(corners2, cameraMatrix=mtx, distCoeffs=dist, P=mtx)
         H, mask = cv2.findHomography(objp, corners3, cv2.RANSAC, 5.0)
         if H is not None:
-            (R, T) = util.camera_pose_from_homography(mtx, H)
+            (R, T) = util.camera_pose_from_homography(mtx_inv, H)
             rvec_, _ = cv2.Rodrigues(R.T)
             t1 = time.time()
             cv2.putText(img, 'Finding camera pose using homography({:.3f}ms):'.format(1000*(t1-t0)), (20, int(frame_height - 90)), cv2.FONT_HERSHEY_SIMPLEX, .5, (100, 255, 255))
